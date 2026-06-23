@@ -8,7 +8,7 @@ export class Carly implements INodeType {
   description: INodeTypeDescription = {
   "displayName": "Carly",
   "name": "carly",
-  "icon": "file:carly.svg",
+  "icon": "file:carly.png",
   "group": [
     "transform"
   ],

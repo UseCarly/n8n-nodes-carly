@@ -2,7 +2,7 @@
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-const icons = ['nodes/Carly/carly.svg'];
+const icons = ['nodes/Carly/carly.png'];
 
 for (const icon of icons) {
   const dest = `dist/${icon}`;
