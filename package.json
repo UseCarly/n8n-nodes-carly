@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-carly",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n community node for Carly — the AI scheduling assistant. Read and manage booking pages, event types, calendars, bookings, and availability slots.",
   "keywords": [
     "n8n-community-node-package",
@@ -12,7 +12,8 @@
   "license": "MIT",
   "homepage": "https://www.usecarly.com",
   "author": {
-    "name": "Carly"
+    "name": "Carly",
+    "email": "support@calbotservice.com"
   },
   "repository": {
     "type": "git",
