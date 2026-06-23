@@ -22,7 +22,10 @@ jobs:
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
+      # --ignore-scripts: skip native build steps from transitive deps
+      # (n8n-workflow pulls in isolated-vm, which fails to compile on CI and
+      # isn't needed — tsc only needs the type definitions).
+      - run: npm ci --ignore-scripts
       - run: npm run build
       - run: npm publish --access public --provenance
         env:
