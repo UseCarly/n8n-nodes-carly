@@ -1,0 +1,51 @@
+{
+  "name": "n8n-nodes-carly",
+  "version": "0.1.0",
+  "description": "n8n community node for Carly — the AI scheduling assistant. Read and manage booking pages, event types, calendars, bookings, and availability slots.",
+  "keywords": [
+    "n8n-community-node-package",
+    "carly",
+    "scheduling",
+    "calendar",
+    "bookings"
+  ],
+  "license": "MIT",
+  "homepage": "https://www.usecarly.com",
+  "author": {
+    "name": "Carly"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/usecarly/n8n-nodes-carly.git"
+  },
+  "engines": {
+    "node": ">=20.15"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && node scripts/copy-icons.mjs",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "release": "npm run build && npm publish --access public --provenance"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/CarlyApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Carly/Carly.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "n8n-workflow": "*",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
