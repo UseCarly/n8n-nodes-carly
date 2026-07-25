@@ -247,7 +247,7 @@ export class Carly implements INodeType {
           "name": "Create",
           "value": "create",
           "action": "Create a new booking page",
-          "description": "Create a new booking page. Requires the `booking_pages:write` scope. Accepts nested fields (--availability, --custom-questions, --duration-options) as JSON.",
+          "description": "Create a new booking page. Requires the `booking_pages:write` scope. Accepts nested fields (--availability, --custom-questions, --duration-options, --widgets) as JSON. Availability calendars are not settable on create — a new page uses the account-wide conflict-check selection until you narrow it with an update.",
           "routing": {
             "request": {
               "method": "POST",
@@ -259,7 +259,7 @@ export class Carly implements INodeType {
           "name": "Update",
           "value": "update",
           "action": "Update an existing booking page by its event type ID",
-          "description": "Update an existing booking page by its event type ID. Requires the `booking_pages:write` scope. Only fields you pass are updated. Nested fields (--availability, --custom-questions, --duration-options) accept JSON and replace the previous value.",
+          "description": "Update an existing booking page by its event type ID. Requires the `booking_pages:write` scope. Only fields you pass are updated. Nested fields (--availability, --custom-questions, --duration-options, --widgets, --availability-calendar-keys) accept JSON and replace the previous value.",
           "routing": {
             "request": {
               "method": "PATCH",
@@ -537,6 +537,45 @@ export class Carly implements INodeType {
           }
         },
         {
+          "displayName": "Notification Email",
+          "name": "notificationEmail",
+          "type": "string",
+          "default": "",
+          "description": "Send new-booking notifications here instead of the account email",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "notificationEmail"
+            }
+          }
+        },
+        {
+          "displayName": "Collect Phone",
+          "name": "collectPhone",
+          "type": "boolean",
+          "default": false,
+          "description": "Ask the guest for a phone number",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "collectPhone"
+            }
+          }
+        },
+        {
+          "displayName": "Collect Company",
+          "name": "collectCompany",
+          "type": "boolean",
+          "default": false,
+          "description": "Ask the guest for a company name",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "collectCompany"
+            }
+          }
+        },
+        {
           "displayName": "Availability",
           "name": "availability",
           "type": "json",
@@ -572,6 +611,19 @@ export class Carly implements INodeType {
             "send": {
               "type": "body",
               "property": "durationOptions"
+            }
+          }
+        },
+        {
+          "displayName": "Widgets",
+          "name": "widgets",
+          "type": "json",
+          "default": "",
+          "description": "Page content blocks as JSON, max 20: [{\"type\":\"video\",\"url\":\"https://youtu.be/...\"},{\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}] (types: video, image, text, link, testimonial)",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "widgets"
             }
           }
         }
@@ -635,6 +687,19 @@ export class Carly implements INodeType {
             "send": {
               "type": "body",
               "property": "isActive"
+            }
+          }
+        },
+        {
+          "displayName": "Availability Calendar Keys",
+          "name": "availabilityCalendarKeys",
+          "type": "json",
+          "default": "",
+          "description": "Calendars that block availability on THIS page, as JSON: [{\"provider\":\"google\",\"integration_id\":12,\"calendar_id\":\"primary\"}] (see `carly calendars list`)",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "availabilityCalendarKeys"
             }
           }
         },
@@ -834,6 +899,45 @@ export class Carly implements INodeType {
           }
         },
         {
+          "displayName": "Notification Email",
+          "name": "notificationEmail",
+          "type": "string",
+          "default": "",
+          "description": "Send new-booking notifications here instead of the account email",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "notificationEmail"
+            }
+          }
+        },
+        {
+          "displayName": "Collect Phone",
+          "name": "collectPhone",
+          "type": "boolean",
+          "default": false,
+          "description": "Ask the guest for a phone number",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "collectPhone"
+            }
+          }
+        },
+        {
+          "displayName": "Collect Company",
+          "name": "collectCompany",
+          "type": "boolean",
+          "default": false,
+          "description": "Ask the guest for a company name",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "collectCompany"
+            }
+          }
+        },
+        {
           "displayName": "Availability",
           "name": "availability",
           "type": "json",
@@ -869,6 +973,19 @@ export class Carly implements INodeType {
             "send": {
               "type": "body",
               "property": "durationOptions"
+            }
+          }
+        },
+        {
+          "displayName": "Widgets",
+          "name": "widgets",
+          "type": "json",
+          "default": "",
+          "description": "Page content blocks as JSON, max 20: [{\"type\":\"video\",\"url\":\"https://youtu.be/...\"},{\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}] (types: video, image, text, link, testimonial)",
+          "routing": {
+            "send": {
+              "type": "body",
+              "property": "widgets"
             }
           }
         }
