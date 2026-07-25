@@ -619,7 +619,7 @@ export class Carly implements INodeType {
           "name": "widgets",
           "type": "json",
           "default": "",
-          "description": "Page content blocks as JSON, max 20: [{\"type\":\"video\",\"url\":\"https://youtu.be/...\"},{\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}] (types: video, image, text, link, testimonial)",
+          "description": "Page content blocks as JSON, max 20. Each block has a type — video, image, text, link, or testimonial — plus that type's fields, e.g. {\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}",
           "routing": {
             "send": {
               "type": "body",
@@ -981,7 +981,7 @@ export class Carly implements INodeType {
           "name": "widgets",
           "type": "json",
           "default": "",
-          "description": "Page content blocks as JSON, max 20: [{\"type\":\"video\",\"url\":\"https://youtu.be/...\"},{\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}] (types: video, image, text, link, testimonial)",
+          "description": "Page content blocks as JSON, max 20. Each block has a type — video, image, text, link, or testimonial — plus that type's fields, e.g. {\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}",
           "routing": {
             "send": {
               "type": "body",
