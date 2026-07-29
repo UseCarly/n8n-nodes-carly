@@ -11,9 +11,13 @@ export class CarlyApi implements ICredentialType {
 
   displayName = 'Carly API';
 
-  // Required by n8n's verification lint (cred-class-field-icon-missing).
-  // Path is relative to the built credentials/ directory.
-  icon: Icon = 'file:../nodes/Carly/carly.png';
+  // Required by n8n's verification lint (cred-class-field-icon-missing), in
+  // the themed form so it reads on light and dark. Paths are relative to the
+  // built credentials/ directory.
+  icon: Icon = {
+    light: 'file:../nodes/Carly/carly.svg',
+    dark: 'file:../nodes/Carly/carly.dark.svg',
+  };
 
   documentationUrl = 'https://www.usecarly.com/developers';
 

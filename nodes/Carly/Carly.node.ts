@@ -2,13 +2,17 @@
 // Regenerate with `npm run gen:n8n` from the carly-cli repo.
 // Source of truth: carly-cli/src/commands/**.
 
+import { NodeConnectionTypes } from 'n8n-workflow';
 import type { INodeType, INodeTypeDescription } from 'n8n-workflow';
 
 export class Carly implements INodeType {
   description: INodeTypeDescription = {
   displayName: "Carly",
   name: "carly",
-  icon: "file:carly.png",
+  icon: {
+    light: "file:carly.svg",
+    dark: "file:carly.dark.svg"
+  },
   group: [
     "transform"
   ],
@@ -20,10 +24,10 @@ export class Carly implements INodeType {
   },
   usableAsTool: true,
   inputs: [
-    "main"
+    NodeConnectionTypes.Main
   ],
   outputs: [
-    "main"
+    NodeConnectionTypes.Main
   ],
   credentials: [
     {

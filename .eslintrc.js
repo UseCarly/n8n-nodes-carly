@@ -29,11 +29,12 @@ module.exports = {
       plugins: ['eslint-plugin-n8n-nodes-base'],
       extends: ['plugin:n8n-nodes-base/nodes'],
       rules: {
-        // Advisory ("Try to use an SVG icon") and needs a vector version of
-        // the Carly logo, which is a design asset rather than a code change.
-        // Not part of n8n's verification scan, which only runs the
-        // @n8n/community-nodes rules. Warn so it stays visible.
-        'n8n-nodes-base/node-class-description-icon-not-svg': 'warn',
+        // These two contradict @n8n/community-nodes/node-connection-type-literal,
+        // which n8n's verification scan enforces: the scan requires
+        // NodeConnectionTypes.Main, while these older rules demand the bare
+        // "main" string literal. The scan is the gate, so it wins.
+        'n8n-nodes-base/node-class-description-inputs-wrong-regular-node': 'off',
+        'n8n-nodes-base/node-class-description-outputs-wrong': 'off',
       },
     },
   ],
