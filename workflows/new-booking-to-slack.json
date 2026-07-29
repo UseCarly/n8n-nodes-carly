@@ -150,7 +150,8 @@
           ],
           "combinator": "and"
         },
-        "options": {}
+        "options": {},
+        "looseTypeValidation": true
       },
       "id": "is-cancellation",
       "name": "Is this a cancellation?",
