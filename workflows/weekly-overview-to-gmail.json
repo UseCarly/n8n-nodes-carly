@@ -1,0 +1,169 @@
+{
+  "name": "Email a weekly overview of your bookings via Carly with Gmail",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Email a weekly overview of your bookings via Carly with Gmail\n\n**Who's it for**\nAnyone using [Carly](https://www.usecarly.com) booking pages who wants a Monday-morning summary of the week's bookings in their inbox.\n\n**How it works**\nEvery Monday at 8am:\n1. Lists all bookings via Carly whose start time falls in the next 7 days\n2. Splits them into one item per booking\n3. Builds an HTML table (when, event, who, status), sorted by start time\n4. Emails the digest to you via Gmail\n\n**How to set up**\n1. Install the `n8n-nodes-carly` community node.\n2. Add your Carly API credential (API key from your dashboard at https://www.usecarly.com).\n3. Connect Gmail.\n4. Set your email address in the **Settings** node.\n5. Activate the workflow.\n\n**Requirements** — self-hosted n8n, a Carly account + API key, a Gmail account.\n\n**Customize** — change the send day/time on the trigger; adjust the table in the Build digest node.\n\nLearn more about Carly: https://www.usecarly.com\n\nUses a community node — **self-hosted n8n only**.",
+        "height": 380,
+        "width": 760
+      },
+      "id": "sticky-description",
+      "name": "Sticky Note - Description",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -440]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Configure\nSet the email address to send the weekly overview to.",
+        "height": 220,
+        "width": 200,
+        "color": 7
+      },
+      "id": "sticky-config",
+      "name": "Sticky Note - Configure",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, -20]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Pull this week's bookings\nList bookings in the next 7 days and split into individual items.",
+        "height": 220,
+        "width": 420,
+        "color": 7
+      },
+      "id": "sticky-pull",
+      "name": "Sticky Note - Pull",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [400, -20]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Build & email the digest\nFormat an HTML table and send it via Gmail to the address from Settings.",
+        "height": 220,
+        "width": 420,
+        "color": 7
+      },
+      "id": "sticky-email",
+      "name": "Sticky Note - Email",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [840, -20]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [1],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every Monday 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 60]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "recipient-field",
+              "name": "recipient",
+              "value": "you@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "settings",
+      "name": "Settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 60]
+    },
+    {
+      "parameters": {
+        "resource": "bookings",
+        "operation": "list",
+        "additionalFields": {
+          "limit": 200,
+          "startTime": "={{ $now.startOf('week').toISO() }}",
+          "endTime": "={{ $now.startOf('week').plus({ days: 7 }).toISO() }}"
+        }
+      },
+      "id": "carly-list",
+      "name": "Carly - List this week's bookings",
+      "type": "n8n-nodes-carly.carly",
+      "typeVersion": 1,
+      "position": [440, 60]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "id": "split-items",
+      "name": "Split out bookings",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [660, 60]
+    },
+    {
+      "parameters": {
+        "jsCode": "const bookings = $input.all().map((i) => i.json).filter((b) => b && b.uid);\n\nif (bookings.length === 0) {\n  return [{ json: { subject: 'No bookings via Carly this week', html: '<p>No bookings scheduled for the week ahead.</p>' } }];\n}\n\nbookings.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));\n\nconst fmt = (iso) =>\n  new Date(iso).toLocaleString('en-US', {\n    weekday: 'short',\n    month: 'short',\n    day: 'numeric',\n    hour: 'numeric',\n    minute: '2-digit',\n  });\n\nconst rows = bookings\n  .map((b) => {\n    const a = (b.attendees && b.attendees[0]) || {};\n    const who = a.name ? `${a.name}${a.email ? ` (${a.email})` : ''}` : '-';\n    const cell = 'padding:6px 12px;border-bottom:1px solid #eee';\n    return `<tr><td style=\"${cell}\">${fmt(b.start_time)}</td><td style=\"${cell}\">${b.title || ''}</td><td style=\"${cell}\">${who}</td><td style=\"${cell}\">${b.status}</td></tr>`;\n  })\n  .join('');\n\nconst th = 'text-align:left;padding:6px 12px;border-bottom:2px solid #ddd';\nconst html = `<div style=\"font-family:sans-serif;font-size:14px;color:#222\"><h2>Your bookings via Carly this week (${bookings.length})</h2><table style=\"border-collapse:collapse\"><tr><th style=\"${th}\">When</th><th style=\"${th}\">Event</th><th style=\"${th}\">Who</th><th style=\"${th}\">Status</th></tr>${rows}</table></div>`;\n\nreturn [{ json: { subject: `${bookings.length} booking(s) via Carly this week`, html } }];"
+      },
+      "id": "build-digest",
+      "name": "Build weekly digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 60]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Settings').item.json.recipient }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "gmail-send",
+      "name": "Email the overview",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1100, 60],
+      "webhookId": "carly-weekly-overview-gmail"
+    }
+  ],
+  "connections": {
+    "Every Monday 8am": {
+      "main": [[{ "node": "Settings", "type": "main", "index": 0 }]]
+    },
+    "Settings": {
+      "main": [[{ "node": "Carly - List this week's bookings", "type": "main", "index": 0 }]]
+    },
+    "Carly - List this week's bookings": {
+      "main": [[{ "node": "Split out bookings", "type": "main", "index": 0 }]]
+    },
+    "Split out bookings": {
+      "main": [[{ "node": "Build weekly digest", "type": "main", "index": 0 }]]
+    },
+    "Build weekly digest": {
+      "main": [[{ "node": "Email the overview", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

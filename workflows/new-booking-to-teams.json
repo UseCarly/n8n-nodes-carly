@@ -1,0 +1,142 @@
+{
+  "name": "Post a Microsoft Teams message when you get a new booking via Carly",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Post a Microsoft Teams message when you get a new booking via Carly\n\n**Who's it for**\nAnyone using [Carly](https://www.usecarly.com) booking pages who wants their team notified in Microsoft Teams the moment someone books.\n\n**How it works**\nCarly has no webhooks, so this polls every 5 minutes:\n1. Lists your recent bookings via Carly\n2. Splits them into one item per booking\n3. Drops any already seen in previous runs (deduped by booking `uid`)\n4. Posts a card to a Teams channel for each new booking\n\n**How to set up**\n1. Install the `n8n-nodes-carly` community node.\n2. Add your Carly API credential (API key from your dashboard at https://www.usecarly.com).\n3. Connect Microsoft Teams and pick the team + channel.\n4. Activate the workflow.\n\n**Requirements** — self-hosted n8n, a Carly account + API key, a Microsoft Teams account.\n\n**Customize** — change the poll interval on the trigger; edit the Teams message (fields: `title`, `start_time`, `attendees`, `status`, `notes`).\n\nLearn more about Carly: https://www.usecarly.com\n\nUses a community node — **self-hosted n8n only**.",
+        "height": 360,
+        "width": 760
+      },
+      "id": "sticky-description",
+      "name": "Sticky Note - Description",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -420]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Poll Carly for new bookings\nEvery 5 min: list bookings, split into individual items, then keep only ones not seen before (deduped by `uid`).",
+        "height": 220,
+        "width": 800,
+        "color": 7
+      },
+      "id": "sticky-poll",
+      "name": "Sticky Note - Poll",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -20]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Notify Microsoft Teams\nConnect your Teams credential and choose the team + channel for each new booking.",
+        "height": 220,
+        "width": 280,
+        "color": 7
+      },
+      "id": "sticky-notify",
+      "name": "Sticky Note - Notify",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [800, -20]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 5 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 60]
+    },
+    {
+      "parameters": {
+        "resource": "bookings",
+        "operation": "list",
+        "additionalFields": {
+          "limit": 50
+        }
+      },
+      "id": "carly-list",
+      "name": "Carly - List bookings",
+      "type": "n8n-nodes-carly.carly",
+      "typeVersion": 1,
+      "position": [220, 60]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "id": "split-items",
+      "name": "Split out bookings",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [440, 60]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.uid }}",
+        "options": {}
+      },
+      "id": "dedupe-new",
+      "name": "Keep only new bookings",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [660, 60]
+    },
+    {
+      "parameters": {
+        "resource": "channelMessage",
+        "operation": "create",
+        "teamId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "contentType": "html",
+        "message": "=<h3>New booking via Carly</h3><p><b>{{ $json.title }}</b></p><p><b>When:</b> {{ DateTime.fromISO($json.start_time).toFormat('ccc, LLL d, h:mm a') }} – {{ DateTime.fromISO($json.end_time).toFormat('h:mm a') }} ({{ $json.attendees[0].timezone }})<br><b>Who:</b> {{ $json.attendees[0].name }} ({{ $json.attendees[0].email }})<br><b>Status:</b> {{ $json.status }}{{ $json.notes ? '<br><b>Notes:</b> ' + $json.notes : '' }}</p>",
+        "options": {}
+      },
+      "id": "teams-post",
+      "name": "Post booking to Teams",
+      "type": "n8n-nodes-base.microsoftTeams",
+      "typeVersion": 2,
+      "position": [880, 60]
+    }
+  ],
+  "connections": {
+    "Every 5 minutes": {
+      "main": [[{ "node": "Carly - List bookings", "type": "main", "index": 0 }]]
+    },
+    "Carly - List bookings": {
+      "main": [[{ "node": "Split out bookings", "type": "main", "index": 0 }]]
+    },
+    "Split out bookings": {
+      "main": [[{ "node": "Keep only new bookings", "type": "main", "index": 0 }]]
+    },
+    "Keep only new bookings": {
+      "main": [[{ "node": "Post booking to Teams", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

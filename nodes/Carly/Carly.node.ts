@@ -6,1353 +6,1349 @@ import type { INodeType, INodeTypeDescription } from 'n8n-workflow';
 
 export class Carly implements INodeType {
   description: INodeTypeDescription = {
-  "displayName": "Carly",
-  "name": "carly",
-  "icon": "file:carly.png",
-  "group": [
+  displayName: "Carly",
+  name: "carly",
+  icon: "file:carly.png",
+  group: [
     "transform"
   ],
-  "version": 1,
-  "subtitle": "={{$parameter[\"operation\"] + \": \" + $parameter[\"resource\"]}}",
-  "description": "Read and manage Carly booking pages, event types, calendars, and bookings",
-  "defaults": {
-    "name": "Carly"
+  version: 1,
+  subtitle: "={{$parameter[\"operation\"] + \": \" + $parameter[\"resource\"]}}",
+  description: "Read and manage Carly booking pages, event types, calendars, and bookings",
+  defaults: {
+    name: "Carly"
   },
-  "usableAsTool": true,
-  "inputs": [
+  usableAsTool: true,
+  inputs: [
     "main"
   ],
-  "outputs": [
+  outputs: [
     "main"
   ],
-  "credentials": [
+  credentials: [
     {
-      "name": "carlyApi",
-      "required": true
+      name: "carlyApi",
+      required: true
     }
   ],
-  "requestDefaults": {
-    "baseURL": "={{$credentials.baseUrl}}",
-    "headers": {
-      "Accept": "application/json",
+  requestDefaults: {
+    baseURL: "={{$credentials.baseUrl}}",
+    headers: {
+      Accept: "application/json",
       "Content-Type": "application/json"
     }
   },
-  "properties": [
+  properties: [
     {
-      "displayName": "Resource",
-      "name": "resource",
-      "type": "options",
-      "noDataExpression": true,
-      "options": [
+      displayName: "Resource",
+      name: "resource",
+      type: "options",
+      noDataExpression: true,
+      options: [
         {
-          "name": "Profile",
-          "value": "profile"
+          name: "Booking",
+          value: "bookings"
         },
         {
-          "name": "Calendars",
-          "value": "calendars"
+          name: "Booking Page",
+          value: "booking-pages"
         },
         {
-          "name": "Booking Pages",
-          "value": "booking-pages"
+          name: "Calendar",
+          value: "calendars"
         },
         {
-          "name": "Event Types",
-          "value": "event-types"
+          name: "Event Type",
+          value: "event-types"
         },
         {
-          "name": "Slots",
-          "value": "slots"
+          name: "Profile",
+          value: "profile"
         },
         {
-          "name": "Bookings",
-          "value": "bookings"
+          name: "Slot",
+          value: "slots"
         }
       ],
-      "default": "profile"
+      default: "profile"
     },
     {
-      "displayName": "Operation",
-      "name": "operation",
-      "type": "options",
-      "noDataExpression": true,
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      noDataExpression: true,
+      displayOptions: {
+        show: {
+          resource: [
             "profile"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "name": "Whoami",
-          "value": "whoami",
-          "action": "Show the user the API key belongs to",
-          "description": "Show the user the API key belongs to",
-          "routing": {
-            "request": {
-              "method": "GET",
-              "url": "/whoami"
+          name: "Whoami",
+          value: "whoami",
+          action: "Get profile",
+          description: "Show the user the API key belongs to",
+          routing: {
+            request: {
+              method: "GET",
+              url: "/whoami"
             }
           }
         }
       ],
-      "default": "whoami"
+      default: "whoami"
     },
     {
-      "displayName": "Operation",
-      "name": "operation",
-      "type": "options",
-      "noDataExpression": true,
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      noDataExpression: true,
+      displayOptions: {
+        show: {
+          resource: [
             "calendars"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "name": "List",
-          "value": "list",
-          "action": "List connected calendars for the authenticated user",
-          "description": "List connected calendars for the authenticated user. The `selected` field mirrors the \"Check for conflicts on\" state in the web UI — calendars with `selected: true` count against booking-page availability.",
-          "routing": {
-            "request": {
-              "method": "GET",
-              "url": "/calendars"
+          name: "List",
+          value: "list",
+          action: "List calendars",
+          description: "List connected calendars for the authenticated user. The `selected` field mirrors the \"Check for conflicts on\" state in the web UI — calendars with `selected: true` count against booking-page availability.",
+          routing: {
+            request: {
+              method: "GET",
+              url: "/calendars"
             }
           }
         },
         {
-          "name": "Select",
-          "value": "select",
-          "action": "Mark a calendar as counting against booking-page availability (\"Check for conflicts on\")",
-          "description": "Mark a calendar as counting against booking-page availability (\"Check for conflicts on\"). Requires the `booking_pages:write` scope. The flag is account-wide — every booking page on this calendar's integration will honor it on the next availability check.",
-          "routing": {
-            "request": {
-              "method": "POST",
-              "url": "/calendars/select",
-              "body": {
-                "selected": true
+          name: "Select",
+          value: "select",
+          action: "Add a calendar to availability",
+          description: "Mark a calendar as counting against booking-page availability (\"Check for conflicts on\"). Requires the `booking_pages:write` scope. The flag is account-wide — every booking page on this calendar's integration will honor it on the next availability check.",
+          routing: {
+            request: {
+              method: "POST",
+              url: "/calendars/select",
+              body: {
+                selected: true
               }
             }
           }
         },
         {
-          "name": "Unselect",
-          "value": "unselect",
-          "action": "Stop counting a calendar against booking-page availability",
-          "description": "Stop counting a calendar against booking-page availability. Requires the `booking_pages:write` scope. Inverse of `carly calendars select`.",
-          "routing": {
-            "request": {
-              "method": "POST",
-              "url": "/calendars/select",
-              "body": {
-                "selected": false
+          name: "Unselect",
+          value: "unselect",
+          action: "Remove a calendar from availability",
+          description: "Stop counting a calendar against booking-page availability. Requires the `booking_pages:write` scope. Inverse of `carly calendars select`.",
+          routing: {
+            request: {
+              method: "POST",
+              url: "/calendars/select",
+              body: {
+                selected: false
               }
             }
           }
         }
       ],
-      "default": "list"
+      default: "list"
     },
     {
-      "displayName": "Calendar Key",
-      "name": "calendar_key",
-      "type": "string",
-      "required": true,
-      "default": "",
-      "description": "Calendar Key",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Calendar Key",
+      name: "calendar_key",
+      type: "string",
+      required: true,
+      default: "",
+      displayOptions: {
+        show: {
+          resource: [
             "calendars"
           ],
-          "operation": [
+          operation: [
             "select"
           ]
         }
       },
-      "routing": {
-        "send": {
-          "type": "body",
-          "property": "calendar_key"
+      routing: {
+        send: {
+          type: "body",
+          property: "calendar_key"
         }
       }
     },
     {
-      "displayName": "Calendar Key",
-      "name": "calendar_key",
-      "type": "string",
-      "required": true,
-      "default": "",
-      "description": "Calendar Key",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Calendar Key",
+      name: "calendar_key",
+      type: "string",
+      required: true,
+      default: "",
+      displayOptions: {
+        show: {
+          resource: [
             "calendars"
           ],
-          "operation": [
+          operation: [
             "unselect"
           ]
         }
       },
-      "routing": {
-        "send": {
-          "type": "body",
-          "property": "calendar_key"
+      routing: {
+        send: {
+          type: "body",
+          property: "calendar_key"
         }
       }
     },
     {
-      "displayName": "Operation",
-      "name": "operation",
-      "type": "options",
-      "noDataExpression": true,
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      noDataExpression: true,
+      displayOptions: {
+        show: {
+          resource: [
             "booking-pages"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "name": "List",
-          "value": "list",
-          "action": "List the authenticated user's booking pages (event types with public links)",
-          "description": "List the authenticated user's booking pages (event types with public links)",
-          "routing": {
-            "request": {
-              "method": "GET",
-              "url": "/booking-pages"
+          name: "Create",
+          value: "create",
+          action: "Create a booking page",
+          description: "Create a new booking page. Requires the `booking_pages:write` scope. Accepts nested fields (--availability, --custom-questions, --duration-options, --widgets) as JSON. Availability calendars are not settable on create — a new page uses the account-wide conflict-check selection until you narrow it with an update.",
+          routing: {
+            request: {
+              method: "POST",
+              url: "/booking-pages"
             }
           }
         },
         {
-          "name": "Get",
-          "value": "get",
-          "action": "Get a single booking page by its event type ID",
-          "description": "Get a single booking page by its event type ID",
-          "routing": {
-            "request": {
-              "method": "GET",
-              "url": "=/booking-pages/{{$parameter[\"eventTypeId\"]}}"
+          name: "Delete",
+          value: "delete",
+          action: "Delete a booking page",
+          description: "Deactivate (pause) a booking page by its event type ID. The server soft-deletes: the page is hidden from public booking (is_active=false) but the row is retained and the page can be re-activated via `update &lt;ID&gt; --is-active true`. Requires the `booking_pages:write` scope.",
+          routing: {
+            request: {
+              method: "DELETE",
+              url: "=/booking-pages/{{$parameter[\"eventTypeId\"]}}"
             }
           }
         },
         {
-          "name": "Create",
-          "value": "create",
-          "action": "Create a new booking page",
-          "description": "Create a new booking page. Requires the `booking_pages:write` scope. Accepts nested fields (--availability, --custom-questions, --duration-options, --widgets) as JSON. Availability calendars are not settable on create — a new page uses the account-wide conflict-check selection until you narrow it with an update.",
-          "routing": {
-            "request": {
-              "method": "POST",
-              "url": "/booking-pages"
+          name: "Get",
+          value: "get",
+          action: "Get a booking page",
+          description: "Get a single booking page by its event type ID",
+          routing: {
+            request: {
+              method: "GET",
+              url: "=/booking-pages/{{$parameter[\"eventTypeId\"]}}"
             }
           }
         },
         {
-          "name": "Update",
-          "value": "update",
-          "action": "Update an existing booking page by its event type ID",
-          "description": "Update an existing booking page by its event type ID. Requires the `booking_pages:write` scope. Only fields you pass are updated. Nested fields (--availability, --custom-questions, --duration-options, --widgets, --availability-calendar-keys) accept JSON and replace the previous value.",
-          "routing": {
-            "request": {
-              "method": "PATCH",
-              "url": "=/booking-pages/{{$parameter[\"eventTypeId\"]}}"
+          name: "List",
+          value: "list",
+          action: "List booking pages",
+          description: "List the authenticated user's booking pages (event types with public links)",
+          routing: {
+            request: {
+              method: "GET",
+              url: "/booking-pages"
             }
           }
         },
         {
-          "name": "Delete",
-          "value": "delete",
-          "action": "Deactivate (pause) a booking page by its event type ID",
-          "description": "Deactivate (pause) a booking page by its event type ID. The server soft-deletes: the page is hidden from public booking (is_active=false) but the row is retained and the page can be re-activated via `update <id> --is-active true`. Requires the `booking_pages:write` scope.",
-          "routing": {
-            "request": {
-              "method": "DELETE",
-              "url": "=/booking-pages/{{$parameter[\"eventTypeId\"]}}"
+          name: "Update",
+          value: "update",
+          action: "Update a booking page",
+          description: "Update an existing booking page by its event type ID. Requires the `booking_pages:write` scope. Only fields you pass are updated. Nested fields (--availability, --custom-questions, --duration-options, --widgets, --availability-calendar-keys) accept JSON and replace the previous value.",
+          routing: {
+            request: {
+              method: "PATCH",
+              url: "=/booking-pages/{{$parameter[\"eventTypeId\"]}}"
             }
           }
         }
       ],
-      "default": "list"
+      default: "list"
     },
     {
-      "displayName": "Event Type Id",
-      "name": "eventTypeId",
-      "type": "number",
-      "required": true,
-      "default": 0,
-      "description": "Event Type Id",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Event Type ID",
+      name: "eventTypeId",
+      type: "number",
+      required: true,
+      default: 0,
+      displayOptions: {
+        show: {
+          resource: [
             "booking-pages"
           ],
-          "operation": [
+          operation: [
             "get"
           ]
         }
       }
     },
     {
-      "displayName": "Title",
-      "name": "title",
-      "type": "string",
-      "required": true,
-      "default": "",
-      "description": "Page title (required)",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Title",
+      name: "title",
+      type: "string",
+      required: true,
+      default: "",
+      displayOptions: {
+        show: {
+          resource: [
             "booking-pages"
           ],
-          "operation": [
+          operation: [
             "create"
           ]
         }
       },
-      "routing": {
-        "send": {
-          "type": "body",
-          "property": "title"
+      description: "Page title (required)",
+      routing: {
+        send: {
+          type: "body",
+          property: "title"
         }
       }
     },
     {
-      "displayName": "Additional Fields",
-      "name": "additionalFields",
-      "type": "collection",
-      "placeholder": "Add Field",
-      "default": {},
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Additional Fields",
+      name: "additionalFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      displayOptions: {
+        show: {
+          resource: [
             "booking-pages"
           ],
-          "operation": [
+          operation: [
             "create"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "displayName": "Slug",
-          "name": "slug",
-          "type": "string",
-          "default": "",
-          "description": "URL slug (e.g. \"15min\")",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "slug"
+          displayName: "After Event Buffer",
+          name: "afterEventBuffer",
+          type: "number",
+          default: 0,
+          description: "Buffer after each meeting (minutes)",
+          routing: {
+            send: {
+              type: "body",
+              property: "afterEventBuffer"
             }
           }
         },
         {
-          "displayName": "Description",
-          "name": "description",
-          "type": "string",
-          "default": "",
-          "description": "Page description",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "description"
+          displayName: "Availability",
+          name: "availability",
+          type: "json",
+          default: "",
+          description: "Weekly availability as JSON: [{\"days\":[1,2,3,4,5],\"start_time\":\"09:00\",\"end_time\":\"17:00\"}] (days: Sun=0..Sat=6)",
+          routing: {
+            send: {
+              type: "body",
+              property: "availability"
             }
           }
         },
         {
-          "displayName": "Duration",
-          "name": "duration",
-          "type": "number",
-          "default": 0,
-          "description": "Meeting length in minutes",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "duration"
+          displayName: "Before Event Buffer",
+          name: "beforeEventBuffer",
+          type: "number",
+          default: 0,
+          description: "Buffer before each meeting (minutes)",
+          routing: {
+            send: {
+              type: "body",
+              property: "beforeEventBuffer"
             }
           }
         },
         {
-          "displayName": "Location",
-          "name": "location",
-          "type": "string",
-          "default": "",
-          "description": "Meeting location (physical or URL)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "location"
+          displayName: "Calendar Key",
+          name: "calendarKey",
+          type: "string",
+          default: "",
+          description: "Target calendar key (see `carly calendars list`)",
+          routing: {
+            send: {
+              type: "body",
+              property: "calendarKey"
             }
           }
         },
         {
-          "displayName": "Video Provider",
-          "name": "videoProvider",
-          "type": "string",
-          "default": "",
-          "description": "Video provider (google_meet, teams, zoom, ...)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "videoProvider"
+          displayName: "Collect Company",
+          name: "collectCompany",
+          type: "boolean",
+          default: false,
+          description: "Whether to ask the guest for a company name",
+          routing: {
+            send: {
+              type: "body",
+              property: "collectCompany"
             }
           }
         },
         {
-          "displayName": "Calendar Key",
-          "name": "calendarKey",
-          "type": "string",
-          "default": "",
-          "description": "Target calendar key (see `carly calendars list`)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "calendarKey"
+          displayName: "Collect Phone",
+          name: "collectPhone",
+          type: "boolean",
+          default: false,
+          description: "Whether to ask the guest for a phone number",
+          routing: {
+            send: {
+              type: "body",
+              property: "collectPhone"
             }
           }
         },
         {
-          "displayName": "Timezone",
-          "name": "timezone",
-          "type": "string",
-          "default": "",
-          "description": "IANA timezone (e.g. America/New_York)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "timezone"
+          displayName: "Custom Questions",
+          name: "customQuestions",
+          type: "json",
+          default: "",
+          description: "Custom questions as JSON: [{\"label\":\"Company\",\"type\":\"text\",\"required\":true}]",
+          routing: {
+            send: {
+              type: "body",
+              property: "customQuestions"
             }
           }
         },
         {
-          "displayName": "Username",
-          "name": "username",
-          "type": "string",
-          "default": "",
-          "description": "Profile username (lowercase, a-z0-9-)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "username"
+          displayName: "Description",
+          name: "description",
+          type: "string",
+          default: "",
+          description: "Page description",
+          routing: {
+            send: {
+              type: "body",
+              property: "description"
             }
           }
         },
         {
-          "displayName": "Display Name",
-          "name": "displayName",
-          "type": "string",
-          "default": "",
-          "description": "Public display name on the booking page",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "displayName"
+          displayName: "Display Name",
+          name: "displayName",
+          type: "string",
+          default: "",
+          description: "Public display name on the booking page",
+          routing: {
+            send: {
+              type: "body",
+              property: "displayName"
             }
           }
         },
         {
-          "displayName": "Event Name Template",
-          "name": "eventNameTemplate",
-          "type": "string",
-          "default": "",
-          "description": "Template for generated event titles",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "eventNameTemplate"
+          displayName: "Duration",
+          name: "duration",
+          type: "number",
+          default: 0,
+          description: "Meeting length in minutes",
+          routing: {
+            send: {
+              type: "body",
+              property: "duration"
             }
           }
         },
         {
-          "displayName": "Min Notice Minutes",
-          "name": "minNoticeMinutes",
-          "type": "number",
-          "default": 0,
-          "description": "Minimum notice before a booking (minutes)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "minNoticeMinutes"
+          displayName: "Duration Options",
+          name: "durationOptions",
+          type: "json",
+          default: "",
+          description: "Bookable durations as CSV (15,30,60) or JSON array ([15,30,60])",
+          routing: {
+            send: {
+              type: "body",
+              property: "durationOptions"
             }
           }
         },
         {
-          "displayName": "Max Days Ahead",
-          "name": "maxDaysAhead",
-          "type": "number",
-          "default": 0,
-          "description": "Max days ahead a booking can be placed",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "maxDaysAhead"
+          displayName: "Event Name Template",
+          name: "eventNameTemplate",
+          type: "string",
+          default: "",
+          description: "Template for generated event titles",
+          routing: {
+            send: {
+              type: "body",
+              property: "eventNameTemplate"
             }
           }
         },
         {
-          "displayName": "Before Event Buffer",
-          "name": "beforeEventBuffer",
-          "type": "number",
-          "default": 0,
-          "description": "Buffer before each meeting (minutes)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "beforeEventBuffer"
+          displayName: "Location",
+          name: "location",
+          type: "string",
+          default: "",
+          description: "Meeting location (physical or URL)",
+          routing: {
+            send: {
+              type: "body",
+              property: "location"
             }
           }
         },
         {
-          "displayName": "After Event Buffer",
-          "name": "afterEventBuffer",
-          "type": "number",
-          "default": 0,
-          "description": "Buffer after each meeting (minutes)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "afterEventBuffer"
+          displayName: "Max Days Ahead",
+          name: "maxDaysAhead",
+          type: "number",
+          default: 0,
+          description: "Max days ahead a booking can be placed",
+          routing: {
+            send: {
+              type: "body",
+              property: "maxDaysAhead"
             }
           }
         },
         {
-          "displayName": "Slot Interval",
-          "name": "slotInterval",
-          "type": "number",
-          "default": 0,
-          "description": "Slot interval override (minutes)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "slotInterval"
+          displayName: "Min Notice Minutes",
+          name: "minNoticeMinutes",
+          type: "number",
+          default: 0,
+          description: "Minimum notice before a booking (minutes)",
+          routing: {
+            send: {
+              type: "body",
+              property: "minNoticeMinutes"
             }
           }
         },
         {
-          "displayName": "Notification Email",
-          "name": "notificationEmail",
-          "type": "string",
-          "default": "",
-          "description": "Send new-booking notifications here instead of the account email",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "notificationEmail"
+          displayName: "Notification Email",
+          name: "notificationEmail",
+          type: "string",
+          default: "",
+          description: "Send new-booking notifications here instead of the account email",
+          routing: {
+            send: {
+              type: "body",
+              property: "notificationEmail"
             }
           }
         },
         {
-          "displayName": "Collect Phone",
-          "name": "collectPhone",
-          "type": "boolean",
-          "default": false,
-          "description": "Ask the guest for a phone number",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "collectPhone"
+          displayName: "Slot Interval",
+          name: "slotInterval",
+          type: "number",
+          default: 0,
+          description: "Slot interval override (minutes)",
+          routing: {
+            send: {
+              type: "body",
+              property: "slotInterval"
             }
           }
         },
         {
-          "displayName": "Collect Company",
-          "name": "collectCompany",
-          "type": "boolean",
-          "default": false,
-          "description": "Ask the guest for a company name",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "collectCompany"
+          displayName: "Slug",
+          name: "slug",
+          type: "string",
+          default: "",
+          description: "URL slug (e.g. \"15min\")",
+          routing: {
+            send: {
+              type: "body",
+              property: "slug"
             }
           }
         },
         {
-          "displayName": "Availability",
-          "name": "availability",
-          "type": "json",
-          "default": "",
-          "description": "Weekly availability as JSON: [{\"days\":[1,2,3,4,5],\"start_time\":\"09:00\",\"end_time\":\"17:00\"}] (days: Sun=0..Sat=6)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "availability"
+          displayName: "Timezone",
+          name: "timezone",
+          type: "string",
+          default: "",
+          description: "IANA timezone (e.g. America/New_York)",
+          routing: {
+            send: {
+              type: "body",
+              property: "timezone"
             }
           }
         },
         {
-          "displayName": "Custom Questions",
-          "name": "customQuestions",
-          "type": "json",
-          "default": "",
-          "description": "Custom questions as JSON: [{\"label\":\"Company\",\"type\":\"text\",\"required\":true}]",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "customQuestions"
+          displayName: "Username",
+          name: "username",
+          type: "string",
+          default: "",
+          description: "Profile username (lowercase, a-z0-9-)",
+          routing: {
+            send: {
+              type: "body",
+              property: "username"
             }
           }
         },
         {
-          "displayName": "Duration Options",
-          "name": "durationOptions",
-          "type": "json",
-          "default": "",
-          "description": "Bookable durations as CSV (15,30,60) or JSON array ([15,30,60])",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "durationOptions"
+          displayName: "Video Provider",
+          name: "videoProvider",
+          type: "string",
+          default: "",
+          description: "Video provider (google_meet, teams, zoom, ...)",
+          routing: {
+            send: {
+              type: "body",
+              property: "videoProvider"
             }
           }
         },
         {
-          "displayName": "Widgets",
-          "name": "widgets",
-          "type": "json",
-          "default": "",
-          "description": "Page content blocks as JSON, max 20. Each block has a type — video, image, text, link, or testimonial — plus that type's fields, e.g. {\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "widgets"
+          displayName: "Widgets",
+          name: "widgets",
+          type: "json",
+          default: "",
+          description: "Page content blocks as JSON, max 20. Each block has a type — video, image, text, link, or testimonial — plus that type's fields, e.g. {\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}.",
+          routing: {
+            send: {
+              type: "body",
+              property: "widgets"
             }
           }
         }
       ]
     },
     {
-      "displayName": "Event Type Id",
-      "name": "eventTypeId",
-      "type": "number",
-      "required": true,
-      "default": 0,
-      "description": "Event Type Id",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Event Type ID",
+      name: "eventTypeId",
+      type: "number",
+      required: true,
+      default: 0,
+      displayOptions: {
+        show: {
+          resource: [
             "booking-pages"
           ],
-          "operation": [
+          operation: [
             "update"
           ]
         }
       }
     },
     {
-      "displayName": "Additional Fields",
-      "name": "additionalFields",
-      "type": "collection",
-      "placeholder": "Add Field",
-      "default": {},
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Additional Fields",
+      name: "additionalFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      displayOptions: {
+        show: {
+          resource: [
             "booking-pages"
           ],
-          "operation": [
+          operation: [
             "update"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "displayName": "Title",
-          "name": "title",
-          "type": "string",
-          "default": "",
-          "description": "Page title",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "title"
+          displayName: "After Event Buffer",
+          name: "afterEventBuffer",
+          type: "number",
+          default: 0,
+          description: "Buffer after each meeting (minutes)",
+          routing: {
+            send: {
+              type: "body",
+              property: "afterEventBuffer"
             }
           }
         },
         {
-          "displayName": "Is Active",
-          "name": "isActive",
-          "type": "boolean",
-          "default": false,
-          "description": "Enable or disable the page",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "isActive"
+          displayName: "Availability",
+          name: "availability",
+          type: "json",
+          default: "",
+          description: "Weekly availability as JSON: [{\"days\":[1,2,3,4,5],\"start_time\":\"09:00\",\"end_time\":\"17:00\"}] (days: Sun=0..Sat=6)",
+          routing: {
+            send: {
+              type: "body",
+              property: "availability"
             }
           }
         },
         {
-          "displayName": "Availability Calendar Keys",
-          "name": "availabilityCalendarKeys",
-          "type": "json",
-          "default": "",
-          "description": "Calendars that block availability on THIS page, as JSON: [{\"provider\":\"google\",\"integration_id\":12,\"calendar_id\":\"primary\"}] (see `carly calendars list`)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "availabilityCalendarKeys"
+          displayName: "Availability Calendar Keys",
+          name: "availabilityCalendarKeys",
+          type: "json",
+          default: "",
+          description: "Calendars that block availability on THIS page, as JSON: [{\"provider\":\"google\",\"integration_id\":12,\"calendar_id\":\"primary\"}] (see `carly calendars list`)",
+          routing: {
+            send: {
+              type: "body",
+              property: "availabilityCalendarKeys"
             }
           }
         },
         {
-          "displayName": "Slug",
-          "name": "slug",
-          "type": "string",
-          "default": "",
-          "description": "URL slug (e.g. \"15min\")",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "slug"
+          displayName: "Before Event Buffer",
+          name: "beforeEventBuffer",
+          type: "number",
+          default: 0,
+          description: "Buffer before each meeting (minutes)",
+          routing: {
+            send: {
+              type: "body",
+              property: "beforeEventBuffer"
             }
           }
         },
         {
-          "displayName": "Description",
-          "name": "description",
-          "type": "string",
-          "default": "",
-          "description": "Page description",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "description"
+          displayName: "Calendar Key",
+          name: "calendarKey",
+          type: "string",
+          default: "",
+          description: "Target calendar key (see `carly calendars list`)",
+          routing: {
+            send: {
+              type: "body",
+              property: "calendarKey"
             }
           }
         },
         {
-          "displayName": "Duration",
-          "name": "duration",
-          "type": "number",
-          "default": 0,
-          "description": "Meeting length in minutes",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "duration"
+          displayName: "Collect Company",
+          name: "collectCompany",
+          type: "boolean",
+          default: false,
+          description: "Whether to ask the guest for a company name",
+          routing: {
+            send: {
+              type: "body",
+              property: "collectCompany"
             }
           }
         },
         {
-          "displayName": "Location",
-          "name": "location",
-          "type": "string",
-          "default": "",
-          "description": "Meeting location (physical or URL)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "location"
+          displayName: "Collect Phone",
+          name: "collectPhone",
+          type: "boolean",
+          default: false,
+          description: "Whether to ask the guest for a phone number",
+          routing: {
+            send: {
+              type: "body",
+              property: "collectPhone"
             }
           }
         },
         {
-          "displayName": "Video Provider",
-          "name": "videoProvider",
-          "type": "string",
-          "default": "",
-          "description": "Video provider (google_meet, teams, zoom, ...)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "videoProvider"
+          displayName: "Custom Questions",
+          name: "customQuestions",
+          type: "json",
+          default: "",
+          description: "Custom questions as JSON: [{\"label\":\"Company\",\"type\":\"text\",\"required\":true}]",
+          routing: {
+            send: {
+              type: "body",
+              property: "customQuestions"
             }
           }
         },
         {
-          "displayName": "Calendar Key",
-          "name": "calendarKey",
-          "type": "string",
-          "default": "",
-          "description": "Target calendar key (see `carly calendars list`)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "calendarKey"
+          displayName: "Description",
+          name: "description",
+          type: "string",
+          default: "",
+          description: "Page description",
+          routing: {
+            send: {
+              type: "body",
+              property: "description"
             }
           }
         },
         {
-          "displayName": "Timezone",
-          "name": "timezone",
-          "type": "string",
-          "default": "",
-          "description": "IANA timezone (e.g. America/New_York)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "timezone"
+          displayName: "Display Name",
+          name: "displayName",
+          type: "string",
+          default: "",
+          description: "Public display name on the booking page",
+          routing: {
+            send: {
+              type: "body",
+              property: "displayName"
             }
           }
         },
         {
-          "displayName": "Username",
-          "name": "username",
-          "type": "string",
-          "default": "",
-          "description": "Profile username (lowercase, a-z0-9-)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "username"
+          displayName: "Duration",
+          name: "duration",
+          type: "number",
+          default: 0,
+          description: "Meeting length in minutes",
+          routing: {
+            send: {
+              type: "body",
+              property: "duration"
             }
           }
         },
         {
-          "displayName": "Display Name",
-          "name": "displayName",
-          "type": "string",
-          "default": "",
-          "description": "Public display name on the booking page",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "displayName"
+          displayName: "Duration Options",
+          name: "durationOptions",
+          type: "json",
+          default: "",
+          description: "Bookable durations as CSV (15,30,60) or JSON array ([15,30,60])",
+          routing: {
+            send: {
+              type: "body",
+              property: "durationOptions"
             }
           }
         },
         {
-          "displayName": "Event Name Template",
-          "name": "eventNameTemplate",
-          "type": "string",
-          "default": "",
-          "description": "Template for generated event titles",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "eventNameTemplate"
+          displayName: "Event Name Template",
+          name: "eventNameTemplate",
+          type: "string",
+          default: "",
+          description: "Template for generated event titles",
+          routing: {
+            send: {
+              type: "body",
+              property: "eventNameTemplate"
             }
           }
         },
         {
-          "displayName": "Min Notice Minutes",
-          "name": "minNoticeMinutes",
-          "type": "number",
-          "default": 0,
-          "description": "Minimum notice before a booking (minutes)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "minNoticeMinutes"
+          displayName: "Is Active",
+          name: "isActive",
+          type: "boolean",
+          default: false,
+          description: "Whether to enable or disable the page",
+          routing: {
+            send: {
+              type: "body",
+              property: "isActive"
             }
           }
         },
         {
-          "displayName": "Max Days Ahead",
-          "name": "maxDaysAhead",
-          "type": "number",
-          "default": 0,
-          "description": "Max days ahead a booking can be placed",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "maxDaysAhead"
+          displayName: "Location",
+          name: "location",
+          type: "string",
+          default: "",
+          description: "Meeting location (physical or URL)",
+          routing: {
+            send: {
+              type: "body",
+              property: "location"
             }
           }
         },
         {
-          "displayName": "Before Event Buffer",
-          "name": "beforeEventBuffer",
-          "type": "number",
-          "default": 0,
-          "description": "Buffer before each meeting (minutes)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "beforeEventBuffer"
+          displayName: "Max Days Ahead",
+          name: "maxDaysAhead",
+          type: "number",
+          default: 0,
+          description: "Max days ahead a booking can be placed",
+          routing: {
+            send: {
+              type: "body",
+              property: "maxDaysAhead"
             }
           }
         },
         {
-          "displayName": "After Event Buffer",
-          "name": "afterEventBuffer",
-          "type": "number",
-          "default": 0,
-          "description": "Buffer after each meeting (minutes)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "afterEventBuffer"
+          displayName: "Min Notice Minutes",
+          name: "minNoticeMinutes",
+          type: "number",
+          default: 0,
+          description: "Minimum notice before a booking (minutes)",
+          routing: {
+            send: {
+              type: "body",
+              property: "minNoticeMinutes"
             }
           }
         },
         {
-          "displayName": "Slot Interval",
-          "name": "slotInterval",
-          "type": "number",
-          "default": 0,
-          "description": "Slot interval override (minutes)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "slotInterval"
+          displayName: "Notification Email",
+          name: "notificationEmail",
+          type: "string",
+          default: "",
+          description: "Send new-booking notifications here instead of the account email",
+          routing: {
+            send: {
+              type: "body",
+              property: "notificationEmail"
             }
           }
         },
         {
-          "displayName": "Notification Email",
-          "name": "notificationEmail",
-          "type": "string",
-          "default": "",
-          "description": "Send new-booking notifications here instead of the account email",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "notificationEmail"
+          displayName: "Slot Interval",
+          name: "slotInterval",
+          type: "number",
+          default: 0,
+          description: "Slot interval override (minutes)",
+          routing: {
+            send: {
+              type: "body",
+              property: "slotInterval"
             }
           }
         },
         {
-          "displayName": "Collect Phone",
-          "name": "collectPhone",
-          "type": "boolean",
-          "default": false,
-          "description": "Ask the guest for a phone number",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "collectPhone"
+          displayName: "Slug",
+          name: "slug",
+          type: "string",
+          default: "",
+          description: "URL slug (e.g. \"15min\")",
+          routing: {
+            send: {
+              type: "body",
+              property: "slug"
             }
           }
         },
         {
-          "displayName": "Collect Company",
-          "name": "collectCompany",
-          "type": "boolean",
-          "default": false,
-          "description": "Ask the guest for a company name",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "collectCompany"
+          displayName: "Timezone",
+          name: "timezone",
+          type: "string",
+          default: "",
+          description: "IANA timezone (e.g. America/New_York)",
+          routing: {
+            send: {
+              type: "body",
+              property: "timezone"
             }
           }
         },
         {
-          "displayName": "Availability",
-          "name": "availability",
-          "type": "json",
-          "default": "",
-          "description": "Weekly availability as JSON: [{\"days\":[1,2,3,4,5],\"start_time\":\"09:00\",\"end_time\":\"17:00\"}] (days: Sun=0..Sat=6)",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "availability"
+          displayName: "Title",
+          name: "title",
+          type: "string",
+          default: "",
+          description: "Page title",
+          routing: {
+            send: {
+              type: "body",
+              property: "title"
             }
           }
         },
         {
-          "displayName": "Custom Questions",
-          "name": "customQuestions",
-          "type": "json",
-          "default": "",
-          "description": "Custom questions as JSON: [{\"label\":\"Company\",\"type\":\"text\",\"required\":true}]",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "customQuestions"
+          displayName: "Username",
+          name: "username",
+          type: "string",
+          default: "",
+          description: "Profile username (lowercase, a-z0-9-)",
+          routing: {
+            send: {
+              type: "body",
+              property: "username"
             }
           }
         },
         {
-          "displayName": "Duration Options",
-          "name": "durationOptions",
-          "type": "json",
-          "default": "",
-          "description": "Bookable durations as CSV (15,30,60) or JSON array ([15,30,60])",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "durationOptions"
+          displayName: "Video Provider",
+          name: "videoProvider",
+          type: "string",
+          default: "",
+          description: "Video provider (google_meet, teams, zoom, ...)",
+          routing: {
+            send: {
+              type: "body",
+              property: "videoProvider"
             }
           }
         },
         {
-          "displayName": "Widgets",
-          "name": "widgets",
-          "type": "json",
-          "default": "",
-          "description": "Page content blocks as JSON, max 20. Each block has a type — video, image, text, link, or testimonial — plus that type's fields, e.g. {\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}",
-          "routing": {
-            "send": {
-              "type": "body",
-              "property": "widgets"
+          displayName: "Widgets",
+          name: "widgets",
+          type: "json",
+          default: "",
+          description: "Page content blocks as JSON, max 20. Each block has a type — video, image, text, link, or testimonial — plus that type's fields, e.g. {\"type\":\"text\",\"heading\":\"About\",\"body\":\"...\"}.",
+          routing: {
+            send: {
+              type: "body",
+              property: "widgets"
             }
           }
         }
       ]
     },
     {
-      "displayName": "Event Type Id",
-      "name": "eventTypeId",
-      "type": "number",
-      "required": true,
-      "default": 0,
-      "description": "Event Type Id",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Event Type ID",
+      name: "eventTypeId",
+      type: "number",
+      required: true,
+      default: 0,
+      displayOptions: {
+        show: {
+          resource: [
             "booking-pages"
           ],
-          "operation": [
+          operation: [
             "delete"
           ]
         }
       }
     },
     {
-      "displayName": "Operation",
-      "name": "operation",
-      "type": "options",
-      "noDataExpression": true,
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      noDataExpression: true,
+      displayOptions: {
+        show: {
+          resource: [
             "event-types"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "name": "List",
-          "value": "list",
-          "action": "List event types",
-          "description": "List event types. Without --username, returns the authenticated caller's own event types. With --username, returns that public profile's active event types.",
-          "routing": {
-            "request": {
-              "method": "GET",
-              "url": "/event-types"
+          name: "List",
+          value: "list",
+          action: "List event types",
+          description: "List event types. Without --username, returns the authenticated caller's own event types. With --username, returns that public profile's active event types.",
+          routing: {
+            request: {
+              method: "GET",
+              url: "/event-types"
             }
           }
         }
       ],
-      "default": "list"
+      default: "list"
     },
     {
-      "displayName": "Additional Fields",
-      "name": "additionalFields",
-      "type": "collection",
-      "placeholder": "Add Field",
-      "default": {},
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Additional Fields",
+      name: "additionalFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      displayOptions: {
+        show: {
+          resource: [
             "event-types"
           ],
-          "operation": [
+          operation: [
             "list"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "displayName": "Username",
-          "name": "username",
-          "type": "string",
-          "default": "",
-          "description": "Filter to this profile's active event types instead of the caller's",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "username"
+          displayName: "Username",
+          name: "username",
+          type: "string",
+          default: "",
+          description: "Filter to this profile's active event types instead of the caller's",
+          routing: {
+            send: {
+              type: "query",
+              property: "username"
             }
           }
         }
       ]
     },
     {
-      "displayName": "Operation",
-      "name": "operation",
-      "type": "options",
-      "noDataExpression": true,
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      noDataExpression: true,
+      displayOptions: {
+        show: {
+          resource: [
             "slots"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "name": "List",
-          "value": "list",
-          "action": "List available booking slots in a time range",
-          "description": "List available booking slots in a time range. Provide either --event-type-id, or both --username and --event-type-slug.",
-          "routing": {
-            "request": {
-              "method": "GET",
-              "url": "/slots"
+          name: "List",
+          value: "list",
+          action: "List slots",
+          description: "List available booking slots in a time range. Provide either --event-type-ID, or both --username and --event-type-slug.",
+          routing: {
+            request: {
+              method: "GET",
+              url: "/slots"
             }
           }
         }
       ],
-      "default": "list"
+      default: "list"
     },
     {
-      "displayName": "Start Time",
-      "name": "startTime",
-      "type": "string",
-      "required": true,
-      "default": "",
-      "description": "Range start (ISO 8601)",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Start Time",
+      name: "startTime",
+      type: "string",
+      required: true,
+      default: "",
+      displayOptions: {
+        show: {
+          resource: [
             "slots"
           ],
-          "operation": [
+          operation: [
             "list"
           ]
         }
       },
-      "routing": {
-        "send": {
-          "type": "query",
-          "property": "startTime"
+      description: "Range start (ISO 8601)",
+      routing: {
+        send: {
+          type: "query",
+          property: "startTime"
         }
       }
     },
     {
-      "displayName": "End Time",
-      "name": "endTime",
-      "type": "string",
-      "required": true,
-      "default": "",
-      "description": "Range end (ISO 8601)",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "End Time",
+      name: "endTime",
+      type: "string",
+      required: true,
+      default: "",
+      displayOptions: {
+        show: {
+          resource: [
             "slots"
           ],
-          "operation": [
+          operation: [
             "list"
           ]
         }
       },
-      "routing": {
-        "send": {
-          "type": "query",
-          "property": "endTime"
+      description: "Range end (ISO 8601)",
+      routing: {
+        send: {
+          type: "query",
+          property: "endTime"
         }
       }
     },
     {
-      "displayName": "Additional Fields",
-      "name": "additionalFields",
-      "type": "collection",
-      "placeholder": "Add Field",
-      "default": {},
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Additional Fields",
+      name: "additionalFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      displayOptions: {
+        show: {
+          resource: [
             "slots"
           ],
-          "operation": [
+          operation: [
             "list"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "displayName": "Event Type Id",
-          "name": "eventTypeId",
-          "type": "number",
-          "default": 0,
-          "description": "Event type ID",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "eventTypeId"
+          displayName: "Duration",
+          name: "duration",
+          type: "number",
+          default: 0,
+          description: "Override slot duration (minutes)",
+          routing: {
+            send: {
+              type: "query",
+              property: "duration"
             }
           }
         },
         {
-          "displayName": "Username",
-          "name": "username",
-          "type": "string",
-          "default": "",
-          "description": "Profile username (with --event-type-slug)",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "username"
+          displayName: "Event Type ID",
+          name: "eventTypeId",
+          type: "number",
+          default: 0,
+          routing: {
+            send: {
+              type: "query",
+              property: "eventTypeId"
             }
           }
         },
         {
-          "displayName": "Event Type Slug",
-          "name": "eventTypeSlug",
-          "type": "string",
-          "default": "",
-          "description": "Event type slug (with --username)",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "eventTypeSlug"
+          displayName: "Event Type Slug",
+          name: "eventTypeSlug",
+          type: "string",
+          default: "",
+          description: "Event type slug (with --username)",
+          routing: {
+            send: {
+              type: "query",
+              property: "eventTypeSlug"
             }
           }
         },
         {
-          "displayName": "Duration",
-          "name": "duration",
-          "type": "number",
-          "default": 0,
-          "description": "Override slot duration (minutes)",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "duration"
+          displayName: "Username",
+          name: "username",
+          type: "string",
+          default: "",
+          description: "Profile username (with --event-type-slug)",
+          routing: {
+            send: {
+              type: "query",
+              property: "username"
             }
           }
         }
       ]
     },
     {
-      "displayName": "Operation",
-      "name": "operation",
-      "type": "options",
-      "noDataExpression": true,
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Operation",
+      name: "operation",
+      type: "options",
+      noDataExpression: true,
+      displayOptions: {
+        show: {
+          resource: [
             "bookings"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "name": "List",
-          "value": "list",
-          "action": "List the authenticated user's bookings",
-          "description": "List the authenticated user's bookings. Supports filters for status, event type, and time range.",
-          "routing": {
-            "request": {
-              "method": "GET",
-              "url": "/bookings"
+          name: "Get",
+          value: "get",
+          action: "Get a booking",
+          description: "Get a single booking by its UID",
+          routing: {
+            request: {
+              method: "GET",
+              url: "=/bookings/{{$parameter[\"uid\"]}}"
             }
           }
         },
         {
-          "name": "Get",
-          "value": "get",
-          "action": "Get a single booking by its UID",
-          "description": "Get a single booking by its UID",
-          "routing": {
-            "request": {
-              "method": "GET",
-              "url": "=/bookings/{{$parameter[\"uid\"]}}"
+          name: "List",
+          value: "list",
+          action: "List bookings",
+          description: "List the authenticated user's bookings. Supports filters for status, event type, and time range.",
+          routing: {
+            request: {
+              method: "GET",
+              url: "/bookings"
             }
           }
         }
       ],
-      "default": "list"
+      default: "list"
     },
     {
-      "displayName": "Additional Fields",
-      "name": "additionalFields",
-      "type": "collection",
-      "placeholder": "Add Field",
-      "default": {},
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "Additional Fields",
+      name: "additionalFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      displayOptions: {
+        show: {
+          resource: [
             "bookings"
           ],
-          "operation": [
+          operation: [
             "list"
           ]
         }
       },
-      "options": [
+      options: [
         {
-          "displayName": "Status",
-          "name": "status",
-          "type": "string",
-          "default": "",
-          "description": "Filter by booking status",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "status"
+          displayName: "End Time",
+          name: "endTime",
+          type: "string",
+          default: "",
+          description: "Range end (ISO 8601)",
+          routing: {
+            send: {
+              type: "query",
+              property: "endTime"
             }
           }
         },
         {
-          "displayName": "Event Type Id",
-          "name": "eventTypeId",
-          "type": "number",
-          "default": 0,
-          "description": "Filter by event type ID",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "eventTypeId"
+          displayName: "Event Type ID",
+          name: "eventTypeId",
+          type: "number",
+          default: 0,
+          description: "Filter by event type ID",
+          routing: {
+            send: {
+              type: "query",
+              property: "eventTypeId"
             }
           }
         },
         {
-          "displayName": "Limit",
-          "name": "limit",
-          "type": "number",
-          "default": 0,
-          "description": "Max bookings to return (1–1000, default 100)",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "limit"
+          displayName: "Limit",
+          name: "limit",
+          type: "number",
+          default: 50,
+          typeOptions: {
+            minValue: 1
+          },
+          description: "Max number of results to return",
+          routing: {
+            send: {
+              type: "query",
+              property: "limit"
             }
           }
         },
         {
-          "displayName": "Start Time",
-          "name": "startTime",
-          "type": "string",
-          "default": "",
-          "description": "Range start (ISO 8601)",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "startTime"
+          displayName: "Start Time",
+          name: "startTime",
+          type: "string",
+          default: "",
+          description: "Range start (ISO 8601)",
+          routing: {
+            send: {
+              type: "query",
+              property: "startTime"
             }
           }
         },
         {
-          "displayName": "End Time",
-          "name": "endTime",
-          "type": "string",
-          "default": "",
-          "description": "Range end (ISO 8601)",
-          "routing": {
-            "send": {
-              "type": "query",
-              "property": "endTime"
+          displayName: "Status",
+          name: "status",
+          type: "string",
+          default: "",
+          description: "Filter by booking status",
+          routing: {
+            send: {
+              type: "query",
+              property: "status"
             }
           }
         }
       ]
     },
     {
-      "displayName": "Uid",
-      "name": "uid",
-      "type": "string",
-      "required": true,
-      "default": "",
-      "description": "Uid",
-      "displayOptions": {
-        "show": {
-          "resource": [
+      displayName: "UID",
+      name: "uid",
+      type: "string",
+      required: true,
+      default: "",
+      displayOptions: {
+        show: {
+          resource: [
             "bookings"
           ],
-          "operation": [
+          operation: [
             "get"
           ]
         }

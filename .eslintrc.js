@@ -28,6 +28,13 @@ module.exports = {
       files: ['./nodes/**/*.ts'],
       plugins: ['eslint-plugin-n8n-nodes-base'],
       extends: ['plugin:n8n-nodes-base/nodes'],
+      rules: {
+        // Advisory ("Try to use an SVG icon") and needs a vector version of
+        // the Carly logo, which is a design asset rather than a code change.
+        // Not part of n8n's verification scan, which only runs the
+        // @n8n/community-nodes rules. Warn so it stays visible.
+        'n8n-nodes-base/node-class-description-icon-not-svg': 'warn',
+      },
     },
   ],
 };

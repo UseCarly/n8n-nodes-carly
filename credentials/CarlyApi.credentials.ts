@@ -2,6 +2,7 @@ import type {
   IAuthenticateGeneric,
   ICredentialTestRequest,
   ICredentialType,
+  Icon,
   INodeProperties,
 } from 'n8n-workflow';
 
@@ -9,6 +10,10 @@ export class CarlyApi implements ICredentialType {
   name = 'carlyApi';
 
   displayName = 'Carly API';
+
+  // Required by n8n's verification lint (cred-class-field-icon-missing).
+  // Path is relative to the built credentials/ directory.
+  icon: Icon = 'file:../nodes/Carly/carly.png';
 
   documentationUrl = 'https://www.usecarly.com/developers';
 
@@ -27,7 +32,7 @@ export class CarlyApi implements ICredentialType {
       displayName: 'Base URL',
       name: 'baseUrl',
       type: 'string',
-      default: 'https://dashboard.carlyassistant.com/api/v1',
+      default: 'https://carlyassistant.com/api/v1',
       description: 'Carly API base URL. Only change this if you are pointing at a non-production environment.',
     },
   ];
