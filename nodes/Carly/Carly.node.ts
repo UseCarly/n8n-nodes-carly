@@ -225,7 +225,7 @@ export class Carly implements INodeType {
           name: "Create",
           value: "create",
           action: "Create a booking page",
-          description: "Create a new booking page. Requires the `booking_pages:write` scope. Accepts nested fields (--availability, --custom-questions, --duration-options, --widgets) as JSON. Availability calendars are not settable on create — a new page uses the account-wide conflict-check selection until you narrow it with an update.",
+          description: "Create a new booking page. Requires the `booking_pages:write` scope. Accepts nested fields (--availability, --date-overrides, --custom-questions, --duration-options, --widgets) as JSON. Availability calendars are not settable on create — a new page uses the account-wide conflict-check selection until you narrow it with an update.",
           routing: {
             request: {
               method: "POST",
@@ -273,7 +273,7 @@ export class Carly implements INodeType {
           name: "Update",
           value: "update",
           action: "Update a booking page",
-          description: "Update an existing booking page by its event type ID. Requires the `booking_pages:write` scope. Only fields you pass are updated. Nested fields (--availability, --custom-questions, --duration-options, --widgets, --availability-calendar-keys) accept JSON and replace the previous value.",
+          description: "Update an existing booking page by its event type ID. Requires the `booking_pages:write` scope. Only fields you pass are updated. Nested fields (--availability, --date-overrides, --custom-questions, --duration-options, --widgets, --availability-calendar-keys) accept JSON and replace the previous value. --availability and --date-overrides are independent: saving one leaves the other untouched, and --date-overrides \"[]\" clears every override.",
           routing: {
             request: {
               method: "PATCH",
@@ -430,6 +430,19 @@ export class Carly implements INodeType {
             send: {
               type: "body",
               property: "customQuestions"
+            }
+          }
+        },
+        {
+          displayName: "Date Overrides",
+          name: "dateOverrides",
+          type: "json",
+          default: "",
+          description: "One-off exceptions to the weekly hours, as JSON. Each entry replaces the weekly pattern for that date: [{\"date\":\"2026-12-24\",\"windows\":[]}] blocks the day, [{\"date\":\"2026-12-24\",\"windows\":[{\"start_time\":\"09:00\",\"end_time\":\"12:00\"}]}] gives it custom hours.",
+          routing: {
+            send: {
+              type: "body",
+              property: "dateOverrides"
             }
           }
         },
@@ -765,6 +778,19 @@ export class Carly implements INodeType {
             send: {
               type: "body",
               property: "customQuestions"
+            }
+          }
+        },
+        {
+          displayName: "Date Overrides",
+          name: "dateOverrides",
+          type: "json",
+          default: "",
+          description: "One-off exceptions to the weekly hours, as JSON. Each entry replaces the weekly pattern for that date: [{\"date\":\"2026-12-24\",\"windows\":[]}] blocks the day, [{\"date\":\"2026-12-24\",\"windows\":[{\"start_time\":\"09:00\",\"end_time\":\"12:00\"}]}] gives it custom hours.",
+          routing: {
+            send: {
+              type: "body",
+              property: "dateOverrides"
             }
           }
         },
